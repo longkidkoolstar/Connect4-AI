@@ -1,0 +1,30 @@
+
+In papergames io connect 4 This is the Board:document.querySelector("#connect4")
+
+This is the class for everyrow:document.querySelector("#connect4 > table > tr:nth-child(row number here 1-6)")
+
+each row has cells:document.querySelector("#connect4 > table > tr:nth-child(6) > td.cell-5-3.ng-star-inserted") The 5-3 represents the row '5' and the cell '3' it is interchangable for different rows. Each cell will eight have :<svg viewBox="0 0 100 100" class="animated tin-in"><circle cx="50" cy="50" r="50" class="circle-dark"></circle><circle cx="50" cy="50" r="5" class="last-move ng-star-inserted"></circle><!----><!----></svg> for red this:<circle cx="50" cy="50" r="50" class="circle-light"></circle>
+for blue or <circle cx="50" cy="50" r="50" class="empty-slot"></circle> for empty
+
+
+
+
+
+
+
+
+
+How to detect AI turn:
+      var chronometer = document.querySelector("app-chronometer");
+            console.log("Chronometer Element: ", chronometer); // Debug log for the chronometer element
+        
+            var numberElement = profileOpener.parentNode.querySelectorAll("span[_ngcontent-serverapp-c155]")[2]; // Select the third element with the number
+            var profileOpenerParent = profileOpener.parentNode.parentNode;
+            console.log("Profile Opener Parent: ", profileOpenerParent); // Debug log for the profile opener parent element
+                                                var svgElement = profileOpenerParent.querySelector("circle[_ngcontent-serverApp-c176][cx='50'][cy='50'][r='35'][class='shape circle-dark-stroked']");
+                        if (!svgElement) {
+                            svgElement = profileOpenerParent.querySelector("svg[role='img'][aria-hidden='true'][focusable='false'][data-prefix='fas'][data-icon='xmark'][class='svg-inline--fa fa-xmark']");
+                        }
+
+                        const number = parseInt(spanElement.textContent, 10);
+                         previousNumber = number;
