@@ -9,6 +9,8 @@
 // @match        https://papergames.io/*
 // @license      none
 // @grant        GM.xmlHttpRequest
+// @grant        GM.setValue
+// @grant        GM.getValue
 // ==/UserScript==
 
 
@@ -98,16 +100,24 @@
     
         let boardState = [];
     
-        for (let row = 0; row < 6; row++) {
+        // Iterate over cells in a more flexible way
+        for (let row = 1; row <= 6; row++) {
             let rowState = [];
-            for (let col = 0; col < 7; col++) {
-                const cellSelector = `.cell-${row}-${col}`;
+            for (let col = 1; col <= 7; col++) {
+                // Use a selector that matches the class names correctly
+                const cellSelector = `.grid-item.cell-${row}-${col}`;
                 const cell = boardContainer.querySelector(cellSelector);
                 if (cell) {
-                    if (cell.querySelector("circle.circle-dark")) {
-                        rowState.push("R");
-                    } else if (cell.querySelector("circle.circle-light")) {
-                        rowState.push("Y");
+                    // Check the circle class names to determine the cell's state
+                    const circle = cell.querySelector("circle");
+                    if (circle) {
+                        if (circle.classList.contains("circle-dark")) {
+                            rowState.push("R");
+                        } else if (circle.classList.contains("circle-light")) {
+                            rowState.push("Y");
+                        } else {
+                            rowState.push("E");
+                        }
                     } else {
                         rowState.push("E");
                     }
@@ -121,21 +131,24 @@
     
         return boardState;
     }
-
+    
     function detectNewMove() {
         const currentBoardState = getBoardState();
-
+        let newMove = false;
+    
         for (let row = 0; row < 6; row++) {
             for (let col = 0; col < 7; col++) {
                 if (lastBoardState[row] && lastBoardState[row][col] === 'E' && currentBoardState[row][col] !== 'E') {
                     moveHistory.push(col + 1);
+                    newMove = true;
                 }
             }
         }
-
+    
         lastBoardState = currentBoardState;
+        return newMove;
     }
-
+    
     function simulateCellClick(column) {
         console.log(`Attempting to click on column ${column}`);
         const boardContainer = document.querySelector(".grid.size6x7");
@@ -233,16 +246,7 @@
             }
         }
     }
-//---GUI
 
-// Check if username is stored in local storage
-var username = await GM.getValue('username');
-
-if (!username) {
-    alert('Username is not stored in local storage.');
-    username = prompt('Please enter your Papergames username (case-sensitive):');
-    await GM.setValue('username', username);
-}
 function logout() {
     localStorage.removeItem('username');
     location.reload();
