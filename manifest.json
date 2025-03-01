@@ -2,7 +2,7 @@
     "manifest_version": 3,
     "name": "Connect 4 AI",
     "version": "1.0",
-    "description": "Displays best moves for both players in Papergames Connect 4.",
+    "description": "Plays the best moves for connect for",
     "permissions": ["storage", "scripting", "activeTab"], 
     "icons": {
       "48": "icons/icon.jpg"  
