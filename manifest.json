@@ -1,0 +1,31 @@
+{
+    "manifest_version": 3,
+    "name": "Connect 4 Board Evaluation",
+    "version": "1.0",
+    "description": "Displays best moves for both players in Papergames Connect 4.",
+    "permissions": ["storage", "scripting", "activeTab"], 
+    "icons": {
+      "48": "icons/icon.png"  
+    },
+    "host_permissions": [
+      "https://papergames.io/*",
+      "http://localhost:8765/*"
+    ],
+    "content_scripts": [
+    {
+        "matches": ["https://papergames.io/*"],
+        "js": ["jquery-3.6.0.min.js", "content.js"],
+        "run_at": "document_idle"
+    }
+    ],
+    "action": {
+      "default_popup": "popup.html", 
+      "default_icon": "icons/icon.png"
+    },
+    "web_accessible_resources": [
+      {
+        "resources": ["!__pycache__/*"],
+        "matches": ["<all_urls>"]
+      }
+    ]
+  }

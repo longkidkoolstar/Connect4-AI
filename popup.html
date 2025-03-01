@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connect 4 Evaluation</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            width: 250px;
+            padding: 10px;
+            background-color: #f1f1f1;
+        }
+        .section {
+            margin-bottom: 15px;
+        }
+        .button {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        .input-field {
+            width: 100%;
+            padding: 8px;
+            font-size: 14px;
+        }
+        .score-display {
+            display: flex;
+            justify-content: space-between;
+            padding: 5px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="section">
+        <button id="toggleScript" class="button" style="background-color: red; color: white;">Script: Disabled</button>
+    </div>
+    
+    <div class="section">
+        <label for="username">Papergames Username:</label>
+        <input type="text" id="username" class="input-field" placeholder="Enter your username">
+        <button id="saveUsername" class="button">Save Username</button>
+    </div>
+
+    <div class="section">
+        <button id="toggleAutoQueue" class="button" style="background-color: red; color: white;">Auto Queue: Off</button>
+    </div>
+
+    <div class="section">
+        <h3>Move Evaluation Scores</h3>
+        <div id="scores" class="score-display">
+            <!-- Scores will be dynamically added here -->
+        </div>
+    </div>
+
+    <div class="section">
+        <button id="logout" class="button" style="background-color: #007bff; color: white;">Logout</button>
+    </div>
+
+    <script src="popup.js"></script>
+</body>
+</html>
