@@ -3,62 +3,118 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Connect 4 Evaluation</title>
+    <title>Connect 4 Extension Bridge</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            width: 250px;
-            padding: 10px;
-            background-color: #f1f1f1;
+            width: 300px;
+            padding: 15px;
+            background-color: #f8f9fa;
         }
         .section {
             margin-bottom: 15px;
+            padding: 10px;
+            border-radius: 5px;
+            background-color: white;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .section-title {
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #333;
         }
         .button {
             width: 100%;
             padding: 8px;
-            margin-top: 5px;
-            font-size: 16px;
+            margin-top: 8px;
+            font-size: 14px;
             cursor: pointer;
+            border: none;
+            border-radius: 4px;
+            background-color: #007bff;
+            color: white;
+        }
+        .button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
         }
         .input-field {
             width: 100%;
             padding: 8px;
             font-size: 14px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
         }
-        .score-display {
+        #serverStatus {
+            padding: 8px;
+            border-radius: 4px;
+            text-align: center;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: white;
+        }
+        .column-buttons {
             display: flex;
             justify-content: space-between;
-            padding: 5px;
-            font-weight: bold;
+            margin-top: 10px;
+        }
+        .column-btn {
+            width: 30px;
+            height: 30px;
+            font-size: 14px;
+            border: none;
+            border-radius: 4px;
+            background-color: #007bff;
+            color: white;
+            cursor: pointer;
+        }
+        .column-btn:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        #message {
+            display: none;
+            padding: 8px;
+            margin-top: 10px;
+            background-color: #d4edda;
+            color: #155724;
+            border-radius: 4px;
+            text-align: center;
         }
     </style>
 </head>
 <body>
+    <div id="serverStatus" style="background-color: #6c757d;">Server: Checking...</div>
+    
     <div class="section">
-        <button id="toggleScript" class="button" style="background-color: red; color: white;">Script: Disabled</button>
+        <div class="section-title">Extension Controls</div>
+        <button id="toggleScript" class="button" style="background-color: green; color: white;">Script: Enabled</button>
     </div>
     
     <div class="section">
-        <label for="username">Papergames Username:</label>
-        <input type="text" id="username" class="input-field" placeholder="Enter your username">
-        <button id="saveUsername" class="button">Save Username</button>
-    </div>
-
-    <div class="section">
-        <button id="toggleAutoQueue" class="button" style="background-color: red; color: white;">Auto Queue: Off</button>
-    </div>
-
-    <div class="section">
-        <h3>Move Evaluation Scores</h3>
-        <div id="scores" class="score-display">
-            <!-- Scores will be dynamically added here -->
+        <div class="section-title">Python Server</div>
+        <button id="calibrateBoard" class="button" style="background-color: #ffc107; color: black;">Calibrate Board</button>
+        <div class="section-title" style="margin-top: 10px;">Manual Column Click</div>
+        <div class="column-buttons">
+            <button class="column-btn" data-column="1">1</button>
+            <button class="column-btn" data-column="2">2</button>
+            <button class="column-btn" data-column="3">3</button>
+            <button class="column-btn" data-column="4">4</button>
+            <button class="column-btn" data-column="5">5</button>
+            <button class="column-btn" data-column="6">6</button>
+            <button class="column-btn" data-column="7">7</button>
         </div>
     </div>
 
     <div class="section">
-        <button id="logout" class="button" style="background-color: #007bff; color: white;">Logout</button>
+        <div class="section-title">User Settings</div>
+        <input type="text" id="username" class="input-field" placeholder="Enter your username">
+        <button id="saveUsername" class="button">Save Username</button>
+        <button id="logout" class="button" style="background-color: #6c757d; margin-top: 5px;">Logout</button>
     </div>
+
+    <div id="message"></div>
 
     <script src="popup.js"></script>
 </body>

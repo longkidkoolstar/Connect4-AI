@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Connect 4 AI for papergames
 // @namespace    https://github.com/longkidkoolstar
-// @version      0.2.4
+// @version      0.2.5
 // @description  Adds an autonomous AI player to Connect 4 on papergames.io with Python mouse control and multiple AI APIs
 // @author       longkidkoolstar
 // @icon         https://th.bing.com/th/id/R.2ea02f33df030351e0ea9bd6df0db744?rik=Pnmqtc4WLvL0ow&pid=ImgRaw&r=0
@@ -28,6 +28,8 @@
     const RESET_CHECK_INTERVAL = 500; // How often to check for reset buttons (ms)
     const SERVER_CHECK_INTERVAL = 10000; // How often to check Python server status (ms)
     const SERVER_RETRY_INTERVAL = 3000; // How often to retry connecting to the server when disconnected (ms)
+    const AUTO_QUEUE_CHECK_INTERVAL = 1000; // How often to check for auto-queue buttons (ms)
+    const AUTO_QUEUE_ENABLED_DEFAULT = false; // Default state for auto-queue
     
     // State variables
     var username = await GM.getValue('username');
@@ -44,6 +46,7 @@
     var bestMoveStrategy = 'optimal'; // 'optimal', 'random', 'defensive'
     var keyboardControlsEnabled = true; // Enable keyboard controls by default
     var selectedAPI = await GM.getValue('selectedAPI', 'gamesolver'); // Default to gamesolver API
+    var isAutoQueueOn = await GM.getValue('autoQueueEnabled', AUTO_QUEUE_ENABLED_DEFAULT); // Get auto-queue state from storage
 
     // If username is not set, prompt the user
     if (!username) {
@@ -119,6 +122,12 @@
             // Toggle API with 'h' key (for Human mode)
             if (event.key === 'h' || event.key === 'H') {
                 toggleAPI();
+                event.preventDefault();
+            }
+            
+            // Toggle Auto-Queue with 'q' key
+            if (event.key === 'q' || event.key === 'Q') {
+                toggleAutoQueue();
                 event.preventDefault();
             }
         });
@@ -799,6 +808,23 @@
             .on('click', toggleAutoPlay)
             .appendTo($container);
             
+        // Create auto-queue toggle button (moved up in the UI for better visibility)
+        const $autoQueueBtn = $('<button>')
+            .attr('id', 'auto-queue-toggle')
+            .text('Auto-Queue: OFF')
+            .addClass('btn btn-danger')
+            .attr('title', 'Automatically leaves room and queues for a new game when a game ends')
+            .css({
+                padding: '5px 10px',
+                borderRadius: '5px',
+                cursor: 'pointer',
+                fontWeight: 'bold',
+                border: 'none',
+                marginTop: '5px'
+            })
+            .on('click', toggleAutoQueue)
+            .appendTo($container);
+            
         // Create keyboard controls toggle button
         const $keyboardBtn = $('<button>')
             .attr('id', 'keyboard-controls-toggle')
@@ -842,7 +868,7 @@
                 marginTop: '5px',
                 maxWidth: '200px'
             })
-            .html('Keyboard Shortcuts:<br>1-7: Click column<br>A: Toggle Auto-Play<br>K: Toggle Keyboard<br>H: Toggle API')
+            .html('Keyboard Shortcuts:<br>1-7: Click column<br>A: Toggle Auto-Play<br>K: Toggle Keyboard<br>H: Toggle API<br>Q: Toggle Auto-Queue')
             .appendTo($container);
             
         // Create strategy selector
@@ -949,32 +975,22 @@
             .on('click', logout)
             .appendTo($container);
             
-        // Create auto-queue toggle (from your original script)
-        const $autoQueueBtn = $('<button>')
-            .attr('id', 'auto-queue-toggle')
-            .text('Auto-Queue: OFF')
-            .addClass('btn btn-danger')
-            .css({
-                padding: '5px 10px',
-                borderRadius: '5px',
-                cursor: 'pointer',
-                marginTop: '5px'
-            })
-            .on('click', toggleAutoQueue)
-            .appendTo($container);
-            
         // Initialize auto-queue state
-        isAutoQueueOn = localStorage.getItem('isToggled') === 'true';
         updateAutoQueueButton();
     }
     
     // Auto-queue functionality
-    var isAutoQueueOn = false;
-    
-    function toggleAutoQueue() {
+    async function toggleAutoQueue() {
         isAutoQueueOn = !isAutoQueueOn;
-        localStorage.setItem('isToggled', isAutoQueueOn);
+        await GM.setValue('autoQueueEnabled', isAutoQueueOn);
         updateAutoQueueButton();
+        console.log(`Auto-Queue ${isAutoQueueOn ? 'enabled' : 'disabled'}`);
+        
+        if (isAutoQueueOn) {
+            showAutoQueueNotification("Auto-Queue enabled - will automatically join new games");
+        } else {
+            showAutoQueueNotification("Auto-Queue disabled");
+        }
     }
     
     function updateAutoQueueButton() {
@@ -992,18 +1008,82 @@
     }
 
     function clickLeaveRoomButton() {
-        $("button.btn-light.ng-tns-c189-7").click();
+        const leaveButton = $("button.btn-light.ng-tns-c189-7");
+        if (leaveButton.length) {
+            console.log("Auto-Queue: Clicking leave room button");
+            leaveButton.click();
+            return true;
+        }
+        return false;
     }
 
     function clickPlayOnlineButton() {
-        document.querySelector("body > app-root > app-navigation > div.d-flex.h-100 > div.d-flex.flex-column.h-100.w-100 > main > app-game-landing > div > div > div > div.col-12.col-lg-9.dashboard > div.card.area-buttons.d-flex.justify-content-center.align-items-center.flex-column > button.btn.btn-secondary.btn-lg.position-relative").click();
+        const playButton = document.querySelector("body > app-root > app-navigation > div.d-flex.h-100 > div.d-flex.flex-column.h-100.w-100 > main > app-game-landing > div > div > div > div.col-12.col-lg-9.dashboard > div.card.area-buttons.d-flex.justify-content-center.align-items-center.flex-column > button.btn.btn-secondary.btn-lg.position-relative");
+        if (playButton) {
+            console.log("Auto-Queue: Clicking play online button");
+            playButton.click();
+            return true;
+        }
+        return false;
     }
 
     function checkButtonsPeriodically() {
-        if (isAutoQueueOn) {
-            clickLeaveRoomButton();
-            clickPlayOnlineButton();
+        if (!isAutoQueueOn) return;
+        
+        // Try to leave room first
+        if (clickLeaveRoomButton()) {
+            // Add visual feedback
+            showAutoQueueNotification("Auto-Queue: Leaving room...");
+            return;
         }
+        
+        // If we couldn't leave (maybe already left), try to play online
+        if (clickPlayOnlineButton()) {
+            showAutoQueueNotification("Auto-Queue: Joining new game...");
+            return;
+        }
+        
+        // Check for other buttons that might indicate game end
+        const playAgainButton = $("button:contains('Play Again')");
+        if (playAgainButton.length) {
+            console.log("Auto-Queue: Clicking play again button");
+            playAgainButton.click();
+            showAutoQueueNotification("Auto-Queue: Playing again...");
+            return;
+        }
+    }
+
+    // Show a temporary notification for auto-queue actions
+    function showAutoQueueNotification(message) {
+        let $notification = $('#auto-queue-notification');
+        
+        if (!$notification.length) {
+            $notification = $('<div>')
+                .attr('id', 'auto-queue-notification')
+                .css({
+                    position: 'fixed',
+                    top: '20px',
+                    right: '20px',
+                    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                    color: 'white',
+                    padding: '10px 15px',
+                    borderRadius: '5px',
+                    zIndex: '10000',
+                    fontSize: '14px',
+                    fontWeight: 'bold',
+                    opacity: '0',
+                    transition: 'opacity 0.3s ease'
+                })
+                .appendTo('body');
+        }
+        
+        $notification.text(message)
+            .css('opacity', '1');
+            
+        // Hide after 3 seconds
+        setTimeout(() => {
+            $notification.css('opacity', '0');
+        }, 3000);
     }
 
     // Handle countdown clicks for auto-queue
@@ -1029,8 +1109,12 @@
     }
 
     // Initialize the script
-    function initialize() {
+    async function initialize() {
         console.log("Connect 4 AI script initializing...");
+        
+        // Load auto-queue state from storage
+        isAutoQueueOn = await GM.getValue('autoQueueEnabled', AUTO_QUEUE_ENABLED_DEFAULT);
+        console.log(`Auto-Queue initialized: ${isAutoQueueOn ? 'ON' : 'OFF'}`);
         
         // Create UI elements
         createUI();
@@ -1049,8 +1133,8 @@
         setInterval(checkForResetButtons, RESET_CHECK_INTERVAL);
         
         // Set up auto-queue functionality
-        setInterval(checkButtonsPeriodically, 1000);
-        setInterval(trackAndClickIfDifferent, 1000);
+        setInterval(checkButtonsPeriodically, AUTO_QUEUE_CHECK_INTERVAL);
+        setInterval(trackAndClickIfDifferent, AUTO_QUEUE_CHECK_INTERVAL);
         
         // Set up move detection
         setInterval(detectNewMove, 100);
