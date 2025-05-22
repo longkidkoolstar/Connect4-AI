@@ -4,9 +4,9 @@ This project enhances the Connect 4 Board Evaluation Chrome extension for paperg
 
 ## Components
 
-1. **Chrome Extension**: Evaluates Connect 4 board positions and displays the best moves
+1. **Chrome Extension/UserScript**: Evaluates Connect 4 board positions and displays the best moves
 2. **Python Mouse Controller**: Controls the mouse to click on the game board
-3. **Bridge Server**: Allows communication between the Chrome extension and the Python controller
+3. **Python Bridge**: Allows communication between the extension/UserScript and the Python controller
 
 ## Setup Instructions
 
@@ -29,17 +29,19 @@ pip install pyautogui pynput
 3. **IMPORTANT**: Run the `clean_extension.bat` file before loading the extension to remove any `__pycache__` directories
 4. Click "Load unpacked" and select the extension folder
 
-### Step 3: Run the Python Controller
+Note: The extension isn't required for the UserScript to work. The UserScript can also click through the bridge Python script directly.
+
+### Step 3: Run the Python Bridge
 
 1. Open a terminal/command prompt
 2. Navigate to the folder containing the Python scripts
-3. Run the bridge server:
+3. Run the Python bridge:
 
 ```bash
 python connect4_extension_bridge.py
 ```
 
-This will start both the mouse controller GUI and the bridge server.
+This will start both the mouse controller GUI and the Python bridge.
 
 ## Usage Instructions
 
@@ -73,49 +75,13 @@ You can enable/disable keyboard controls using the "Keyboard Controls" button in
 - Click "Save Calibration" to save the current calibration to a file
 - Click "Load Calibration" to load a previously saved calibration
 
-## Hosting the Python Server
 
-If you want to host the Python server remotely, here are some free options:
-
-### 1. PythonAnywhere (Free Tier)
-
-- Free hosting for Python applications
-- Includes a web-based console and file editor
-- Limited CPU time and bandwidth on free tier
-- Setup: [PythonAnywhere](https://www.pythonanywhere.com/)
-
-### 2. Heroku (Free Tier)
-
-- Free tier for small applications
-- Supports Python applications
-- Note: Free tier has limitations and may sleep after 30 minutes of inactivity
-- Setup: [Heroku](https://www.heroku.com/)
-
-### 3. Google Cloud Run (Free Tier)
-
-- Serverless platform with generous free tier
-- Pay only for the time your code runs
-- Setup: [Google Cloud Run](https://cloud.google.com/run)
-
-### 4. AWS Lambda + API Gateway (Free Tier)
-
-- Serverless function hosting
-- Free tier includes 1M requests per month
-- Setup: [AWS Lambda](https://aws.amazon.com/lambda/)
-
-### 5. Replit (Free Tier)
-
-- Online IDE with hosting capabilities
-- Good for Python applications
-- Setup: [Replit](https://replit.com/)
-
-**Important Note**: For remote hosting, you'll need to modify the mouse controller to work over a network connection, as direct mouse control requires the server to be running on the same machine as the browser.
 
 ## Troubleshooting
 
-### Python Server Not Connecting
+### Python Bridge Not Connecting
 
-- Make sure the Python server is running
+- Make sure the Python bridge script is running
 - Check that port 8765 is not blocked by a firewall
 - Restart the Python script if needed
 
@@ -140,4 +106,4 @@ This tool uses mouse automation which can be potentially dangerous if misused. T
 ## License
 
 This project is for educational purposes only. Use at your own risk.
- 
+
